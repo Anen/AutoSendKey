@@ -8,7 +8,9 @@
 
 #import <Foundation/Foundation.h>
 
-
+// Function:    GetPIDForString
+// Description: Finds the pid for a string. The process to search should be as precise as possible
+//              in order to avoid duplicate/false return value.
 pid_t GetPIDForString(NSString* process)
 {
 NSTask *task = [[NSTask alloc] init];
@@ -35,6 +37,9 @@ for (NSString *str in [pidList componentsSeparatedByString:@"\n"])
 return (pid);
 }
 
+// Function:    SendKeyAfterTimeToPSN
+// Description: Sends a key code to a process after a certain time. This function enters
+//              an infinite loop and sends the key after each sleep duration.
 void SendKeyAfterTimeToPSN(const CGKeyCode           keyCode,
                            const float               sleep,
                                  ProcessSerialNumber psn)
@@ -51,37 +56,44 @@ while (true)
     CGEventPostToPSN(&psn, eventUp);
         
     // Generate between 30 and 59
-    //sleep = (arc4random() % 30) + 30;
+    // sleep = (arc4random() % 30) + 30;
         
     NSLog(@"Next in %f at %@. Total: %d", sleep, [[NSDate date] dateByAddingTimeInterval:sleep], Total);
         
     [NSThread sleepForTimeInterval:sleep];
     }
-    
+
+// This code is never reached.
 // CFRelease(eventDown);
 // CFRelease(eventUp);
 // CFRelease(eventSource);
 }
 
-int main(      int   argc,
-         const char* argv[])
+// Function: main
+// Description:
+int main(int   argc,
+         char* argv[])
 {
 @autoreleasepool
     {
-    pid_t pid = GetPIDForString(@"adventure");
+    // Parameters
+    // CGKeyCode/key correspondance for some keys below.
+    // 49 = space
+    // 7 = x
+    // 6 = z
+    // 26 = seven
+    NSString* StringToSearch = @"adventure";
+    const CGKeyCode KeyToSend = 49;
+    const float TimeToWait = 0.8;
+        
+    pid_t pid = GetPIDForString(StringToSearch);
         
     ProcessSerialNumber psn;
-        
     OSStatus status = GetProcessForPID(pid, &psn);
-        
+    
     if (status == noErr)
         {
-        // Send key to PSN
-        // 49 = space
-        // 7 = x
-        // 6 = z
-        // 26 = seven
-        SendKeyAfterTimeToPSN(49 /* CGKeyCode */, 0.8, psn);
+        SendKeyAfterTimeToPSN(KeyToSend, TimeToWait, psn);
         }
     else
         {
